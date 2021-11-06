@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import torch
 from sklearn.model_selection import train_test_split
+from torch.utils.data import DataLoader
 
 
 def preprocess(dataset_path, test_size):
@@ -21,6 +22,29 @@ def preprocess(dataset_path, test_size):
 
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size)
     return x_train, x_test, y_train, y_test, num_input
+
+
+def get_dataloader(opt):
+    x_train, x_test, y_train, y_test, num_input = preprocess(opt.dataset_path, opt.test_size)
+    trainset = MushroomDataset((x_train, y_train))
+    testset = MushroomDataset((x_test, y_test))
+
+    trainloader = DataLoader(
+        trainset,
+        batch_size=opt.batch_size_train,
+        shuffle=True,
+        pin_memory=True,
+        num_workers=0
+        )
+
+    testloader = DataLoader(
+        testset,
+        batch_size=opt.batch_size_val,
+        shuffle=True,
+        pin_memory=True,
+        num_workers=0
+        )
+    return trainloader, testloader, num_input
 
 
 class MushroomDataset(Dataset):
