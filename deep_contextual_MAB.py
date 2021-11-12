@@ -65,6 +65,7 @@ def dcmab(opt):
             running_loss = 0
             # network forward & computing loss
             for i in range(2):
+                # TODO: change training logic: only the observed data can be used to train the model
                 res = model(data[i])
 
                 loss = loss_func(res, label[i])
@@ -146,6 +147,10 @@ if __name__ == "__main__":
 
     opt = parser.parse_args()
 
+    """
+    comparison between deep contextual multi-armed bandits and 
+    non-contextual beta-bernoulli bandits
+    """
     # deep contextual multi-armed bandits
     regret_curve_dcmab = dcmab(opt)
 
@@ -157,4 +162,18 @@ if __name__ == "__main__":
     plt.plot(np.arange(1, len(regret_curve_ts) + 1), regret_curve_ts)
     plt.plot(np.arange(1, len(regret_curve_dcmab) + 1), regret_curve_dcmab)
     plt.legend(["ts", "dcmab"])
+    plt.show()
+
+    """
+    comparison between different dropout rate for deep 
+    contextual multi-armed bandits
+    """
+    dropout_rates = [0.1, 0.2, 0.4, 0.6, 0.8]
+    regret_curves = []
+    for i in range(len(dropout_rates)):
+        opt.dropout_rate = dropout_rates[i]
+        regret_curve_dcmab = dcmab(opt)
+        regret_curves.append(regret_curve_dcmab)
+        plt.plot(np.arange(1, len(regret_curve_dcmab) + 1), regret_curve_dcmab)
+    plt.legend(["dropout rate = {}".format(j) for j in dropout_rates])
     plt.show()
